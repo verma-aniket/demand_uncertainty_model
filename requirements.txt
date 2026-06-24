@@ -1,0 +1,10 @@
+joblib==1.5.2
+numba==0.62.1
+numpy==2.3.4
+pandas==2.3.3
+powerlaw==2.0.0
+scikit_learn==1.7.2
+scikit_learn_extra==0.3.0
+scipy==1.17.0
+statsmodels==0.14.5
+tqdm==4.67.1

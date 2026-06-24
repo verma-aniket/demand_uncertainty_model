@@ -1,0 +1,145 @@
+# import libraries
+import sys
+from pathlib import Path
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+from joblib import Parallel, delayed
+
+# 1. LINK CORE FOLDERS (Climb 2 levels out of scripts/demand/ to project root)
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent.parent.parent
+
+# Add root to python path so it can find the 'src' directory if needed later
+if str(REPO_ROOT) not in sys.path:
+    sys.path.append(str(REPO_ROOT))
+
+# for slurm - no within variance computation: sh_dev -c 1 -m 200GB -p serc -t 00:30:00
+
+def main():
+    print("Reading Data...\n")
+
+    # read projections data
+    proj_mat = np.load(REPO_ROOT / "Results" / "Projections" / "City" / "proj_monthly.npy", mmap_mode="r")
+
+    # read input grid
+    id_mat = np.load(REPO_ROOT / "Data" / "Simulator" / "Inputs" / "ID_Grid" / 'id_mat.npy')
+
+    # Read DCC model coefficient weights
+    DCC_weights = np.loadtxt(REPO_ROOT / "Data" / "Simulator" / "Scenarios" / 'DCC_scenarios.csv', delimiter=",", skiprows=1, usecols=20)
+    weights = DCC_weights[id_mat[:, 0].astype(int)]
+
+    # alter weights for testing - comment out for full ensemble
+    weights = weights[0:90]
+    id_mat = id_mat[0:90]
+
+    # Compute Global weighted mean and variance for each year
+
+    print("Computing weighted mean and variance...\n")
+
+    # Weighted mean
+    Y_bar = np.average(proj_mat, axis=0, weights=weights)
+
+    # Weighted variance
+    Var_Y = np.average((proj_mat - Y_bar)**2, axis=0, weights=weights)
+
+    # Define constants
+    num_groups = id_mat.shape[1] - 1 # exclude household composition scenario group
+    num_t = proj_mat.shape[1]
+    var_ratio = np.zeros((num_groups+1, num_t))
+
+    # build id masks and (summed) group weight vectors for each group
+    print("Building ID masks and weight vectors...\n")
+    group_indices = []
+    group_weights = []
+    for n in range(num_groups):
+        id_vec = id_mat[:, n]
+        unique, inverse = np.unique(id_vec, return_inverse=True)
+        idx = {int(g): np.where(inverse == i)[0] for i, g in enumerate(unique)}
+        group_indices.append(idx)
+
+        gw = np.array([np.sum(weights[idx]) for _, idx in group_indices[n].items()])
+        group_weights.append(gw)
+
+    print("Computing variance ratios for each group...\n")
+
+    # Compute variance ratios for each group for all time periods at once
+    # use variance of conditional expectations (VCE) approach 
+    for n in tqdm(range(num_groups), desc="Group No.", ncols=100, colour="green"):
+
+        # build vector to store conditional expectations
+        num_g = len(group_indices[n])
+        E_Y_bar_g = np.zeros((num_g, num_t))
+        
+        for i, g in enumerate(sorted(group_indices[n])):
+            
+            # get indicies for this set of unique group IDs
+            idx = group_indices[n][g]
+            
+            E_Y_bar_g[i] = np.average(proj_mat[idx], axis=0, weights=weights[idx])
+        
+        # compute VCE index - also differently based on group type
+        weights_g = group_weights[n][:, None]
+        VCE = np.sum(weights_g * (E_Y_bar_g - Y_bar)**2, axis=0) / np.sum(weights_g)
+        var_ratio[n] = VCE / Var_Y
+
+    # # Skip - assume within group variance = 1 - sum of variance for all groups
+    # # Compute variance ratio for household composition group
+
+    # print("\nBuilding Global ID mask...\n")
+
+    # # pre-define mask (constant across years)
+    # unique_rows, inverse = np.unique(id_mat[:,0:num_groups], axis=0, return_inverse=True)
+
+    # # pred-define matrix to store conditional variance per global scenario set
+    # Var_Y_bar_g = np.zeros((len(unique_rows), num_t))
+
+    # # Compute conditional variance per global scenario set per year
+    # def compute_var_g(g, proj_mat, inverse):
+    #      # compute conditional variances
+    #      return np.var(proj_mat[inverse == g], axis=0)
+
+    # # Run in parallel
+    # results = Parallel(n_jobs=-1)(
+    #      delayed(compute_var_g)(g, proj_mat, inverse)
+    #      for g in tqdm(range(len(unique_rows)), desc="Global ID", ncols=100, colour="green")
+    # )
+
+    # # Convert to array
+    # Var_Y_bar_g = np.array(results)
+
+    # # need to do a weighted average for the expected conditional variance because different global scenario sets 
+    # # have different weights based on their DCC parameter set
+    # weights_g = weights[unique_rows[:,0]] # get weights for each global scenario set
+    # ECV = np.average(Var_Y_bar_g, axis=0, weights=weights_g)
+    # var_ratio[-2] = ECV / Var_Y
+
+    # alternative within-group variance approach 1 - all groups
+    var_ratio[-1] = 1 - np.sum(var_ratio[0:num_groups],axis=0)
+
+    print("Saving Results...\n")
+
+    # Store results for plotting
+    var_ratio_df = pd.DataFrame(data=100*var_ratio.T)
+
+    # add year and month columns
+    if num_t == 312:
+        var_ratio_df['Year'] = np.repeat(np.arange(2025, 2051), 12)
+        var_ratio_df['Month'] = np.tile(np.arange(1, 13), num_t//12)
+        current_order = var_ratio_df.columns
+        new_order = [current_order[-2], current_order[-1]] + current_order[0:-2].to_list()
+        var_ratio_df = var_ratio_df[new_order]
+    else:
+        var_ratio_df['Year'] = np.arange(2025, 2051)
+        current_order = var_ratio_df.columns
+        new_order = [current_order[-1]] + current_order[0:-1].to_list()
+        var_ratio_df = var_ratio_df[new_order]
+
+    # save to csv
+    output_file = REPO_ROOT / "Results" / "Variance_Decomposition" / 'city_monthly.csv'
+    var_ratio_df.to_csv(output_file, index=False, header=True)
+
+    # End of script
+
+if __name__ == "__main__":
+    main()
