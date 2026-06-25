@@ -49,9 +49,6 @@ def make_seed(*args, max_seed=2**32 - 1):
     return int(h[:8], 16) % max_seed
 
 def make_global_id(id_vec):
-    return f"D{id_vec[0]}_C{id_vec[1]}_P{id_vec[2]}_I{id_vec[3]}"
-
-def make_global_id_V2(id_vec):
     return f"D{id_vec[0]}_C{id_vec[1]}_P{id_vec[2]}_I{id_vec[3]}_A{id_vec[4]}"
 
 def make_global_id_HH(id_vec):

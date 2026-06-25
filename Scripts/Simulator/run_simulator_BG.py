@@ -106,7 +106,7 @@ def generate_demand_projection(scen_idx, hh_pool_list, price_matrix_list, hh_dro
     Generate a single residential demand projection given input parameters.
     """
     # Setup rngs for this projection
-    proj_seed = make_seed(make_global_id_V2(id_grid[scen_idx][0:-1]))
+    proj_seed = make_seed(make_global_id(id_grid[scen_idx][0:-1]))
     dcc_seed = make_seed(f"DCC_{id_grid[scen_idx][0]}")
     pop_seed = make_seed(f"POP_{id_grid[scen_idx][2]}")
     rng_proj = np.random.default_rng(proj_seed)                                        # rng per global scenario
