@@ -203,7 +203,15 @@ python3 -u Scripts/Simulator/run_simulator_city.py
 
 ## Pipeline Outputs
 
-Results are saved automatically to designated directory:
+Results are saved automatically to designated directories:
+
+### Projections
+* **Path**: `Data/Simulator/Outputs/Projections/`
+* **Contents**: single-family urban water monthly and annual demand projections (chunks and merged contiguous, chronological block arrays) organized by spatial scale (city, block-group, and household)
+
+### Components
+* **Path**: `Data/Simulator/Outputs/Components/`
+* **Contents**: individual log-demand components (each term of the DCC model except the intercept term and two random terms) for each demand projection (chunks and merged contiguous, chronological block model component matricies) organized by spatial scale (city, block-group, and household)
 
 ### Projection Statistics
 * **Path**: `Data/Simulator/Outputs/Projection_Statistics/`
