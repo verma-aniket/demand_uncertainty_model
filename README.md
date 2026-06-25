@@ -10,15 +10,15 @@ The layout separates core module definitions (`src/`) and decoupled execution no
 
 ### Core Directories
 
-| Directory Path | Layer / Classification | Primary Operational Function |
+| Directory Path | Classification | Primary Operational Function |
 | :--- | :--- | :--- |
-| `Data/Climate/`               | Storage Warehouse     | Weather related data |
-| `Data/DCC_Model/`             | Storage Warehouse     | DCC model datasets |
-| `Data/Economics/`             | Storage Warehouse     | Inflation data |
-| `Data/Housing/`               | Storage Warehouse     | Urban scaling theory (UST) model related data |
-| `Data/Population/`            | Storage Warehouse     | Growth equation of cities (GEC), population dynamics model related data |
-| `Data/Simulator/Inputs/`      | Storage Warehouse     | Demand simulator input data, scenario input keys/indices, based on full factorial sampling design |
-| `Data/Simulator/Scenarios/`   | Storage Warehouse     | Demand simulator input scenarios |
+| `Data/Climate/`               | Data Storage          | Weather related data |
+| `Data/DCC_Model/`             | Data Storage          | DCC model datasets |
+| `Data/Economics/`             | Data Storage          | Inflation data |
+| `Data/Housing/`               | Data Storage          | Urban scaling theory (UST) model related data |
+| `Data/Population/`            | Data Storage          | Growth equation of cities (GEC), population dynamics model related data |
+| `Data/Simulator/Inputs/`      | Data Storage          | Demand simulator input data, scenario input keys/indices, based on full factorial sampling design |
+| `Data/Simulator/Scenarios/`   | Data Storage          | Demand simulator input scenarios |
 | `src/models/`                 | Architecture Backend  | Model training and parameter estimation for UST and GEC models |
 | `src/utils/`                  | Architecture Backend  | Custom defined helper functions |
 | `Scripts/Climate/`            | Processing Engine     | Climate scenarios development, SWG validation, sampling design |
@@ -158,18 +158,18 @@ These scripts consolidate the output projection chunks and executes statistical 
 ### Standalone Local Execution
 Every script is decoupled and can be run independently directly from the repository root:
 
-# Example for City wide projections
+### Example for City wide projections
 
-# 1. Compile input scenario grids
+#### 1. Compile input scenario grids
 python Scripts/Simulator/Input_Grid/generate_city_input_ID_grid.py
 
-# 2. Execute localized demand simulation
+#### 2. Execute localized demand simulation
 python Scripts/Simulator/run_simulator_city.py
 
-# 3. Post-process demand projections
+#### 3. Post-process demand projections
 python Scripts/Simulator/Post_Processing/post_process_city.py
 
-# 4. Compute projections statistics and perform variance decomposition
+#### 4. Compute projections statistics and perform variance decomposition
 python Scripts/Simulator/Projection_Stats/proj_stats_city.py
 python Scripts/Simulator/Variance_Decomposition/var_decomp_city.py
 
