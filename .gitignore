@@ -5,7 +5,6 @@ __pycache__/
 # Ignore all local data and results folders
 data/
 results/
-outputs/
 
 # Ignore common spreadsheet and data types
 *.csv

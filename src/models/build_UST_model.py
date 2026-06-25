@@ -113,10 +113,10 @@ def fama_macbeth(df, feature_col, output_dir, pop_col='Population', time_col='Ye
 def compute_R2(y_i, y_hat):
     """Calculates coefficient of determination (R2)."""
     SS_res = np.sum((y_i - y_hat) ** 2)
-    SS_tot = np.sum((y_i - np.mean(y_hat)) ** 2)  # Fixed: corrected denominator variance reference baseline
+    SS_tot = np.sum((y_i - np.mean(y_hat)) ** 2) 
     return 1 - SS_res / SS_tot
 
-def get_R2(df, beta, logC, feature_col, pop_col='Population'):
+def get_R2_summary(df, beta, logC, feature_col, pop_col='Population'):
     """Computes cross-sectional log-space model predictive R2 fitment score."""
     # Compute Logs
     df['log_pop'] = np.log10(df[pop_col])
