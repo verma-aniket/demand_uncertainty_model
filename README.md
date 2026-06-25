@@ -1,6 +1,6 @@
 # Urban Water Single-Family Residential Demand Forecast Generator
 
-An end-to-end multi-scenario computational pipeline designed to simulate household-level residential demand and decompose structural forecast uncertainties over multi-decade planning horizons. The architecture models intersecting demand uncertainty sources caused by climate conditions, economic trends, policy actions, population dynamics, household characteristic heterogeneity and household behavioral patterns.
+An end-to-end multi-scenario computational pipeline designed to simulate household-level residential demand and decompose structural forecast uncertainties over multi-decade planning horizons. The architecture models intersecting demand uncertainty sources caused by climate conditions, economic trends, policy actions, population dynamics, household characteristic heterogeneity, and household behavioral patterns.
 
 ---
 
@@ -34,7 +34,7 @@ The layout separates core module definitions (`src/`) and decoupled execution no
 | :--- | :--- |
 | `Scripts/Simulator/Input_Grid/`             | Input scenario index grid builder |
 | `Scripts/Simulator/Post_Processing/`        | Raw output matrix collection and consolidation |
-| `Scripts/Simulator/Projection_Stats/`       | Demand projection statistics calcualtor |
+| `Scripts/Simulator/Projection_Stats/`       | Demand projection statistics calculator |
 | `Scripts/Simulator/Variance_Decomposition/` | Variance of Conditional Expectations (VCE) calculation scripts |
 
 ---
@@ -48,12 +48,12 @@ The src/ modules define the operational backend logic, estimating model paramete
 #### build_GEC_model.py
 * **Purpose**: Builds and trains the growth equation of cities model
 * **Key Methods**:
-  * `get_eta_params`: estimates steady growth random variable Guassian distribution parameters using MLE
+  * `get_eta_params`: estimates steady growth random variable Gaussian distribution parameters using MLE
   * `get_min_flow_model_params`: estimates parameters of minimal model for interurban migration flows using log-linear regression
   * `get_gamma`: estimates gamma parameter
   * `get_beta`: estimates beta parameter using log-log regression
   * `check_heavy_tails`: checks if migration fluctuations are heavy tailed
-  * `get_zeta_params`: estiamtes migration shock random variable Levy stable distribution parameters using MLE
+  * `get_zeta_params`: estimates migration shock random variable Levy stable distribution parameters using MLE
 
 #### build_UST_model.py
 * **Purpose**: Builds and trains the urban scaling theory model to convert population into single-family housing units
@@ -80,7 +80,7 @@ The src/ modules define the operational backend logic, estimating model paramete
 #### simulator_functions.py
 * **Purpose**: Optimized calculation engines and helper functions built for high-throughput runtime execution loops.
 * **Key Methods**:
-  * `make_global_id` and `make_global_id_HH`: Combines spatial vector mappings into unique index hashes across block groups and households to keep random number generator streams indpendent.
+  * `make_global_id` and `make_global_id_HH`: Combines scenario input index vector mappings into unique index hashes to keep random number generator streams independent.
   * `get_tier_prices`: Models increasing block-rate utility tariff structures stochastically using continuous distributions.
   * `weighted_percentiles`: Performs memory-safe, single-pass sorted quantile interpolations over massive output projection dimensions.
   
@@ -108,7 +108,7 @@ These independent scripts evaluate and write background boundary parameters out 
 * `generate_conservation_scenarios.py`: Models utility conservation policy intervention parameters using nonlinear logistic diffusion functions (logistic_function).
 
 #### DCC_Model/
-* `DCC_LL_Function.R` and `DCC_Model_MLE_Main.R`: Formulates maximum lg-likelihood estimations via R to train the DCC model.
+* `DCC_LL_Function.R` and `DCC_Model_MLE_Main.R`: Formulates maximum log-likelihood estimations via R to train the DCC model.
 * `generate_DCC_parameter_scenarios.py`: Samples DCC model parameter scenarios using importance sampling on principal components.
 
 #### Economics/
@@ -116,9 +116,9 @@ These independent scripts evaluate and write background boundary parameters out 
 
 #### Population_Growth/
 * `GEC/get_population_projections.py`: generates city-level population projections using GEC model
-  * to build GEC model: `GEC/save_migration_data.py` --> `GEC/save_model_parameters.py`
+  * To build GEC model: `GEC/save_migration_data.py` --> `GEC/save_model_parameters.py`
 * `UST/get_housing_projections.py`: converts population projections into housing unit projections using UST model
-  * to build UST model: `UST/save_migration_data.py` --> `UST/save_model_parameters.py`
+  * To build UST model: `UST/save_migration_data.py` --> `UST/save_model_parameters.py`
 * `cluster_housing_projections.py`: Applies k-medoid clustering to select representative population growth scenarios from full GEC-UST ensemble
 
 ### Phase 2: Runtime Coordinate Compilation
