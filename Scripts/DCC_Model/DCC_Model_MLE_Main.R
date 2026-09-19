@@ -57,7 +57,7 @@ query <- paste0("SELECT ", cols_str, "
 # read data from SQLite3 database
 # create database connection
 con <- dbConnect(RSQLite::SQLite(), ":memory:",
-                 dbname = "Data/Billing_Data/DCC_DB.db")
+                 dbname = "Data/DCC_Model/DCC_DB.db")
 
 # send query and save results into a dataframe
 dcc_dt <- as.data.table(dbGetQuery(con, query))
